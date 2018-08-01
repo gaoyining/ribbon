@@ -16,3 +16,10 @@ dependencies {
     compile "com.netflix.archaius:archaius-core:${archaius_version}"
     testCompile 'junit:junit:4.11'
 }
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}

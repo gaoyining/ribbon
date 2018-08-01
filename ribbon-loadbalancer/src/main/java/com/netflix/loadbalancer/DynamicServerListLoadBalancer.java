@@ -98,19 +98,27 @@ public class DynamicServerListLoadBalancer<T extends Server> extends BaseLoadBal
     public DynamicServerListLoadBalancer(IClientConfig clientConfig) {
         initWithNiwsConfig(clientConfig);
     }
-    
+
+    /**
+     * 初始化LoadBalancer
+     * @param clientConfig
+     */
     @Override
     public void initWithNiwsConfig(IClientConfig clientConfig) {
         try {
+            // --------------------关键方法------------------------
+            // 初始化ping相关信息
             super.initWithNiwsConfig(clientConfig);
             String niwsServerListClassName = clientConfig.getPropertyAsString(
                     CommonClientConfigKey.NIWSServerListClassName,
                     DefaultClientConfigImpl.DEFAULT_SEVER_LIST_CLASS);
 
+            // 获得serverList实例
             ServerList<T> niwsServerListImpl = (ServerList<T>) ClientFactory
                     .instantiateInstanceWithClientConfig(niwsServerListClassName, clientConfig);
             this.serverListImpl = niwsServerListImpl;
 
+            // 创建ServerListFilter，根据api.ribbon.NIWSServerListFilterClassName；没有则默认ZoneAffinityServerListFilter
             if (niwsServerListImpl instanceof AbstractServerList) {
                 AbstractServerListFilter<T> niwsFilter = ((AbstractServerList) niwsServerListImpl)
                         .getFilterImpl(clientConfig);
@@ -118,14 +126,18 @@ public class DynamicServerListLoadBalancer<T extends Server> extends BaseLoadBal
                 this.filter = niwsFilter;
             }
 
+            // 创建serverListUpdater实例
             String serverListUpdaterClassName = clientConfig.getPropertyAsString(
                     CommonClientConfigKey.ServerListUpdaterClassName,
                     DefaultClientConfigImpl.DEFAULT_SERVER_LIST_UPDATER_CLASS
             );
 
+            // 初始化 serverListUpdater 实例
             this.serverListUpdater = (ServerListUpdater) ClientFactory
                     .instantiateInstanceWithClientConfig(serverListUpdaterClassName, clientConfig);
 
+            // -----------------关键方法----------------
+            // 其余的初始
             restOfInit(clientConfig);
         } catch (Exception e) {
             throw new RuntimeException(
@@ -138,6 +150,7 @@ public class DynamicServerListLoadBalancer<T extends Server> extends BaseLoadBal
     void restOfInit(IClientConfig clientConfig) {
         boolean primeConnection = this.isEnablePrimingConnections();
         // turn this off to avoid duplicated asynchronous priming done in BaseLoadBalancer.setServerList()
+        // 关闭它以避免在BaseLoadBalancer.setServerList（）中完成重复的异步启动
         this.setEnablePrimingConnections(false);
         enableAndInitLearnNewServersFeature();
 
@@ -217,9 +230,13 @@ public class DynamicServerListLoadBalancer<T extends Server> extends BaseLoadBal
      * Feature that lets us add new instances (from AMIs) to the list of
      * existing servers that the LB will use Call this method if you want this
      * feature enabled
+     *
+     * 允许我们将新实例（从AMI）添加到LB将使用的现有服务器列表的功能如果要启用此功能，请调用此方法
      */
     public void enableAndInitLearnNewServersFeature() {
         LOGGER.info("Using serverListUpdater {}", serverListUpdater.getClass().getSimpleName());
+        // ---------------------------关键方法--------------------------
+        // 打开eureka 更新器
         serverListUpdater.start(updateAction);
     }
 
@@ -237,11 +254,15 @@ public class DynamicServerListLoadBalancer<T extends Server> extends BaseLoadBal
     public void updateListOfServers() {
         List<T> servers = new ArrayList<T>();
         if (serverListImpl != null) {
+            // -------------------关键方法---------------------
+            // 获得更新的服务器列表
             servers = serverListImpl.getUpdatedListOfServers();
             LOGGER.debug("List of Servers for {} obtained from Discovery client: {}",
                     getIdentifier(), servers);
 
             if (filter != null) {
+                // -------------------关键方法---------------------
+                // 通过过滤获得服务器列表
                 servers = filter.getFilteredListOfServers(servers);
                 LOGGER.debug("Filtered List of Servers for {} obtained from Discovery client: {}",
                         getIdentifier(), servers);

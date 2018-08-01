@@ -40,6 +40,8 @@ import javax.inject.Provider;
  * The server list class that fetches the server information from Eureka client. ServerList is used by
  * {@link DynamicServerListLoadBalancer} to get server list dynamically.
  *
+ * 从Eureka客户端获取服务器信息的服务器列表类。 {@link DynamicServerListLoadBalancer}使用ServerList动态获取服务器列表。
+ *
  * @author stonse
  *
  */
@@ -48,16 +50,31 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
     private static final Logger logger = LoggerFactory.getLogger(DiscoveryEnabledNIWSServerList.class);
 
     String clientName;
+    /**
+     * 虚拟vip
+     */
     String vipAddresses;
+    /**
+     * 是否安全
+     */
     boolean isSecure = false;
 
+    /**
+     * 是否设置优先虚拟ip服务器
+     */
     boolean prioritizeVipAddressBasedServers = true;
 
     String datacenter;
     String targetRegion;
 
     int overridePort = DefaultClientConfigImpl.DEFAULT_PORT;
+    /**
+     * 是否覆盖端口
+     */
     boolean shouldUseOverridePort = false;
+    /**
+     * 是否用ip和地址
+     */
     boolean shouldUseIpAddr = false;
 
     private final Provider<EurekaClient> eurekaClientProvider;
@@ -100,9 +117,15 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
         initWithNiwsConfig(clientConfig);
     }
 
+    /**
+     * 初始化相关配置
+     * @param clientConfig
+     */
     @Override
     public void initWithNiwsConfig(IClientConfig clientConfig) {
+        // 客户端名称
         clientName = clientConfig.getClientName();
+        // 虚拟ip
         vipAddresses = clientConfig.resolveDeploymentContextbasedVipAddresses();
         if (vipAddresses == null &&
                 ConfigurationManager.getConfigInstance().getBoolean("DiscoveryEnabledNIWSServerList.failFastOnNullVip", true)) {
@@ -116,6 +139,7 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
         shouldUseIpAddr = clientConfig.getPropertyAsBoolean(CommonClientConfigKey.UseIPAddrForServer, DefaultClientConfigImpl.DEFAULT_USEIPADDRESS_FOR_SERVER);
 
         // override client configuration and use client-defined port
+        // 覆盖客户端配置并使用客户端定义的端口
         if(clientConfig.getPropertyAsBoolean(CommonClientConfigKey.ForceClientPortConfiguration, false)){
 
             if(isSecure){
@@ -152,6 +176,10 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
         return obtainServersViaDiscovery();
     }
 
+    /**
+     * 通过Discovery获取服务器
+     * @return
+     */
     private List<DiscoveryEnabledServer> obtainServersViaDiscovery() {
         List<DiscoveryEnabledServer> serverList = new ArrayList<DiscoveryEnabledServer>();
 
@@ -164,6 +192,7 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
         if (vipAddresses!=null){
             for (String vipAddress : vipAddresses.split(",")) {
                 // if targetRegion is null, it will be interpreted as the same region of client
+                // 如果targetRegion为null，它将被解释为客户端的同一区域
                 List<InstanceInfo> listOfInstanceInfo = eurekaClient.getInstancesByVipAddress(vipAddress, isSecure, targetRegion);
                 for (InstanceInfo ii : listOfInstanceInfo) {
                     if (ii.getStatus().equals(InstanceStatus.UP)) {
@@ -176,6 +205,9 @@ public class DiscoveryEnabledNIWSServerList extends AbstractServerList<Discovery
                             // copy is necessary since the InstanceInfo builder just uses the original reference,
                             // and we don't want to corrupt the global eureka copy of the object which may be
                             // used by other clients in our system
+                            // 复制是必要的，因为InstanceInfo构建器只使用原始引用，
+                            // 我们不想破坏可能的对象的全局eureka副本
+                            // 由我们系统中的其他客户使用
                             InstanceInfo copy = new InstanceInfo(ii);
 
                             if(isSecure){

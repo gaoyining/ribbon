@@ -49,6 +49,9 @@ import com.netflix.servo.monitor.Monitors;
  * This information can be used to just observe and understand the runtime
  * behavior of the loadbalancer or more importantly for the basis that
  * determines the loadbalacing strategy
+ *
+ * 作为LaodBalancer中每个节点/服务器的操作特性和统计信息的存储库的类。
+ * 此信息可用于仅观察和理解负载均衡器的运行时行为，或者更重要的是用于确定负载策略策略的基础
  * 
  * @author stonse
  * 

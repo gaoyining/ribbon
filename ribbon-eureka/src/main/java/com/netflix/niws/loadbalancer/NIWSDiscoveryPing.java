@@ -47,12 +47,20 @@ public class NIWSDiscoveryPing extends AbstractLoadBalancerPing {
 
 		/**
 		 * Non IPing interface method - only set this if you care about the "newServers Feature"
+		 *
+		 * 非IPing接口方法 - 只有在关心“newServers功能”时才设置此方法
+		 *
 		 * @param lb
 		 */
 		public void setLb(BaseLoadBalancer lb) {
 			this.lb = lb;
 		}
 
+	/**
+	 * 获得注册中心 UP的服务
+	 * @param server
+	 * @return
+	 */
 		public boolean isAlive(Server server) {
 		    boolean isAlive = true;
 		    if (server!=null && server instanceof DiscoveryEnabledServer){

@@ -22,6 +22,8 @@ import com.netflix.util.Pair;
 /**
  * Class that represents a typical Server (or an addressable Node) i.e. a
  * Host:port identifier
+ *
+ * 表示典型服务器（或可寻址节点）的类，即Host：端口标识符
  * 
  * @author stonse
  * 
@@ -32,6 +34,8 @@ public class Server {
      * Additional meta information of a server, which contains
      * information of the targeting application, as well as server identification
      * specific for a deployment environment, for example, AWS.
+     *
+     * 服务器的其他元信息，包含目标应用程序的信息，以及特定于部署环境的服务器标识，例如AWS。
      */
     public static interface MetaInfo {
         /**

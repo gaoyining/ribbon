@@ -46,6 +46,19 @@ Once the the worst zone is dropped, a zone will be chosen among the rest with th
 A server will be returned from the chosen zone with a given Rule (A Rule is a load balancing strategy, for example {@link AvailabilityFilteringRule})
 For each request, the steps above will be repeated. That is to say, each zone related load balancing decisions are made at real time with the up-to-date statistics aiding the choice.
 
+
+ 选择服务器时可以避免整个区域的负载均衡器。
+
+ 用于衡量区域条件的关键指标是平均活动请求，
+ 每个区域的每个休息客户端聚合。 它是
+ 区域中的未完成请求总数除以可用目标实例的数量（不包括断路器跳闸实例）。
+ 当在坏区域上缓慢发生超时时，此度量标准非常有效。
+
+ LoadBalancer将计算并检查所有可用区域的区域统计信息。 如果任何区域的平均活动请求已达到配置的阈值，则将从活动服务器列表中删除此区域。 如果多个区域已达到阈值，则将删除每个服务器具有最多活动请求的区域。
+ 一旦最差区域被丢弃，将在其余区域中选择一个区域，其概率与其实例数量成比例。
+ 将使用给定规则从所选区域返回服务器（规则是负载平衡策略，例如{@link AvailabilityFilteringRule}）
+ 对于每个请求，将重复上述步骤。 也就是说，每个区域相关的负载平衡决策都是实时进行的，其中包含有助于选择的最新统计数据。
+
  * @author awang
  *
  * @param <T>
@@ -104,8 +117,13 @@ public class ZoneAwareLoadBalancer<T extends Server> extends DynamicServerListLo
                 existingLBEntry.getValue().setServersList(Collections.emptyList());
             }
         }
-    }    
-        
+    }
+
+    /**
+     * 选择服务器
+     * @param key
+     * @return
+     */
     @Override
     public Server chooseServer(Object key) {
         if (!ENABLED.get() || getLoadBalancerStats().getAvailableZones().size() <= 1) {

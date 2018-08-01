@@ -32,11 +32,14 @@ import com.netflix.config.DynamicStringProperty;
 /**
  * Utility class that can load the List of Servers from a Configuration (i.e
  * properties available via Archaius). The property name be defined in this format:
- * 
+ *
+ *
  * <pre>{@code
 <clientName>.<nameSpace>.listOfServers=<comma delimited hostname:port strings>
 }</pre>
- * 
+ *
+ * 可以从配置中加载服务器列表的实用程序类（即通过Archaius提供的属性）。 属性名称以以下格式定义：
+ *
  * @author awang
  * 
  */

@@ -21,6 +21,9 @@ import com.netflix.client.IClientConfigAware;
 
 /**
  * Class that provides a default implementation for setting and getting load balancer
+ *
+ * 提供设置和获取负载均衡器的默认实现的类
+ *
  * @author stonse
  *
  */

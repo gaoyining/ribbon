@@ -26,6 +26,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * Note that when a cache refreshed notification is received, the actual update on the serverList is
  * done on a separate scheduler as the notification is delivered on an eurekaClient thread.
  *
+ * {@link com.netflix.loadbalancer.DynamicServerListLoadBalancer}的服务器列表更新程序，
+ * 它利用eureka的事件侦听器来触发LB缓存更新。 请注意，当收到缓存刷新通知时，
+ * serverList上的实际更新将在单独的调度程序上完成，因为通知是在eurekaClient线程上传递的。
+ *
  * @author David Liu
  */
 public class EurekaNotificationServerListUpdater implements ServerListUpdater {
@@ -134,6 +138,8 @@ public class EurekaNotificationServerListUpdater implements ServerListUpdater {
                                     @Override
                                     public void run() {
                                         try {
+                                            // -----------------------关键方法------------------------
+                                            // 更新缓存
                                             updateAction.doUpdate();
                                             lastUpdated.set(System.currentTimeMillis());
                                         } catch (Exception e) {

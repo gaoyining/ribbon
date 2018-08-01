@@ -28,6 +28,9 @@ import com.netflix.client.config.IClientConfig;
  * The class includes an API to create a filter to be use by load balancer
  * to filter the servers returned from {@link #getUpdatedListOfServers()} or {@link #getInitialListOfServers()}.
  *
+ * 该类包含一个API，用于创建负载均衡器用于过滤从{@link #getUpdatedListOfServers（）}
+ * 或{@link #getInitialListOfServers（）}返回的服务器的过滤器。
+ *
  */
 public abstract class AbstractServerList<T extends Server> implements ServerList<T>, IClientConfigAware {   
      
@@ -37,9 +40,14 @@ public abstract class AbstractServerList<T extends Server> implements ServerList
      * which in turn uses reflection to initialize the filter instance. 
      * The filter class name is determined by the value of {@link CommonClientConfigKey#NIWSServerListFilterClassName}
      * in the {@link IClientConfig}. The default implementation is {@link ZoneAffinityServerListFilter}.
+     *
+     * 获取ServerListFilter实例。 它使用{@link ClientFactory #instantiateInstanceWithClientConfig（String，IClientConfig）}，
+     * 后者又使用反射来初始化过滤器实例。 过滤器类名称由{@link IClientConfig}中的
+     * {@link CommonClientConfigKey＃NIWSServerListFilterClassName}的值确定。 默认实现是{@link ZoneAffinityServerListFilter}。
      */
     public AbstractServerListFilter<T> getFilterImpl(IClientConfig niwsClientConfig) throws ClientException{
         try {
+            // 创建ServerListFilter，根据api.ribbon.NIWSServerListFilterClassName；没有则默认ZoneAffinityServerListFilter
             String niwsServerListFilterClassName = niwsClientConfig
                     .getProperty(
                             CommonClientConfigKey.NIWSServerListFilterClassName,

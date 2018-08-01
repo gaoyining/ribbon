@@ -53,6 +53,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * servers can be set as the server pool. A ping can be set to determine the
  * liveness of a server. Internally, this class maintains an "all" server list
  * and an "up" server list and use them depending on what the caller asks for.
+ *
+ * 负载均衡器的基本实现，可以将任意服务器列表设置为服务器池。 可以设置ping以确定服务器的活跃度。
+ * 在内部，此类维护“all”服务器列表和“up”服务器列表，并根据调用者要求的内容使用它们。
  * 
  * @author stonse
  * 
@@ -62,13 +65,31 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
 
     private static Logger logger = LoggerFactory
             .getLogger(BaseLoadBalancer.class);
+    /**
+     * 默认规则
+     */
     private final static IRule DEFAULT_RULE = new RoundRobinRule();
+    /**
+     * 默认的ping策略
+     */
     private final static SerialPingStrategy DEFAULT_PING_STRATEGY = new SerialPingStrategy();
+    /**
+     * 默认名称
+     */
     private static final String DEFAULT_NAME = "default";
+    /**
+     * 前缀
+     */
     private static final String PREFIX = "LoadBalancer_";
 
+    /**
+     * 规则
+     */
     protected IRule rule = DEFAULT_RULE;
 
+    /**
+     * ping策略
+     */
     protected IPingStrategy pingStrategy = DEFAULT_PING_STRATEGY;
 
     protected IPing ping = null;
@@ -166,26 +187,39 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
     void initWithConfig(IClientConfig clientConfig, IRule rule, IPing ping) {
         initWithConfig(clientConfig, rule, ping, createLoadBalancerStatsFromConfig(config));
     }
-    
+
+    /**
+     * 使用config进行初始化
+     * @param clientConfig
+     * @param rule
+     * @param ping
+     * @param stats
+     */
     void initWithConfig(IClientConfig clientConfig, IRule rule, IPing ping, LoadBalancerStats stats) {
         this.config = clientConfig;
         String clientName = clientConfig.getClientName();
         this.name = clientName;
+        // ping间隔
         int pingIntervalTime = Integer.parseInt(""
                 + clientConfig.getProperty(
                         CommonClientConfigKey.NFLoadBalancerPingInterval,
                         Integer.parseInt("30")));
+        // ping的最大时间
         int maxTotalPingTime = Integer.parseInt(""
                 + clientConfig.getProperty(
                         CommonClientConfigKey.NFLoadBalancerMaxTotalPingTime,
                         Integer.parseInt("2")));
 
+        // 设置ping间隔
         setPingInterval(pingIntervalTime);
+        // 设置ping时间
         setMaxTotalPingTime(maxTotalPingTime);
 
         // cross associate with each other
         // i.e. Rule,Ping meet your container LB
         // LB, these are your Ping and Rule guys ...
+        // 即规则，Ping满足你的容器LB.
+        // LB，这些是你的Ping和规则家伙......
         setRule(rule);
         setPing(ping);
 
@@ -210,22 +244,32 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
     
     @Override
     public void initWithNiwsConfig(IClientConfig clientConfig) {
+        // 获得规则的类名
         String ruleClassName = (String) clientConfig
                 .getProperty(CommonClientConfigKey.NFLoadBalancerRuleClassName);
+        // 获得ping的类名
         String pingClassName = (String) clientConfig
                 .getProperty(CommonClientConfigKey.NFLoadBalancerPingClassName);
         IRule rule;
         IPing ping;
         LoadBalancerStats stats;
         try {
+            // --------------------------关键方法--------------------------------
+            // 创建rule
             rule = (IRule) ClientFactory.instantiateInstanceWithClientConfig(
                     ruleClassName, clientConfig);
+            // --------------------------关键方法--------------------------------
+            // 创建ping
             ping = (IPing) ClientFactory.instantiateInstanceWithClientConfig(
                     pingClassName, clientConfig);
+            // --------------------------关键方法--------------------------------
+            // 创建stats
             stats = createLoadBalancerStatsFromConfig(clientConfig);
         } catch (Exception e) {
             throw new RuntimeException("Error initializing load balancer", e);
         }
+        // --------------------------关键方法--------------------------------
+        // 设置ping间隔，ping的最大时间
         initWithConfig(clientConfig, rule, ping, stats);
     }
 
@@ -338,7 +382,11 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
             logger.debug("LoadBalancer [{}]:  pingIntervalSeconds set to {}",
         	    name, this.pingIntervalSeconds);
         }
-        setupPingTask(); // since ping data changed
+        // since ping data changed
+        // 因为ping数据已更改
+        // ----------------------------------------关键方法----------------------------------------
+        // 执行ping task
+        setupPingTask();
     }
 
     public int getPingInterval() {
@@ -379,7 +427,9 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
         if (ping != null) {
             if (!ping.equals(this.ping)) {
                 this.ping = ping;
-                setupPingTask(); // since ping data changed
+                // since ping data changed
+                // 因为ping数据已更改
+                setupPingTask();
             }
         } else {
             this.ping = null;
@@ -636,6 +686,8 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
     /**
      * TimerTask that keeps runs every X seconds to check the status of each
      * server/node in the Server List
+     *
+     * 每隔X秒保持运行的TimerTask，以检查服务器列表中每个服务器/节点的状态
      * 
      * @author stonse
      * 
@@ -643,6 +695,7 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
     class PingTask extends TimerTask {
         public void run() {
             try {
+                // 设置
             	new Pinger(pingStrategy).runPinger();
             } catch (Exception e) {
                 logger.error("LoadBalancer [{}]: Error pinging", name, e);
@@ -652,6 +705,8 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
 
     /**
      * Class that contains the mechanism to "ping" all the instances
+     *
+     * 包含“ping”所有实例的机制的类
      * 
      * @author stonse
      *
@@ -664,9 +719,15 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
             this.pingerStrategy = pingerStrategy;
         }
 
+        /**
+         * 执行ping
+         * @throws Exception
+         */
         public void runPinger() throws Exception {
-            if (!pingInProgress.compareAndSet(false, true)) { 
-                return; // Ping in progress - nothing to do
+            if (!pingInProgress.compareAndSet(false, true)) {
+                // Ping in progress - nothing to do
+                // Ping正在进行中 - 什么都不做
+                return;
             }
             
             // we are "in" - we get to Ping
@@ -847,6 +908,8 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
 
     /**
      * Register with monitors and start priming connections if it is set.
+     *
+     * 注册监视器并启动启动连接（如果已设置）。
      */
     protected void init() {
         Monitors.registerObject("LoadBalancer_" + name, this);
@@ -892,6 +955,9 @@ public class BaseLoadBalancer extends AbstractLoadBalancer implements
      * Default implementation for <c>IPingStrategy</c>, performs ping
      * serially, which may not be desirable, if your <c>IPing</c>
      * implementation is slow, or you have large number of servers.
+     *
+     * <c> IPingStrategy </ c>的默认实现，串行执行ping，
+     * 如果您的<c> IPing </ c>实施很慢，或者您有大量服务器，这可能是不可取的。
      */
     private static class SerialPingStrategy implements IPingStrategy {
 

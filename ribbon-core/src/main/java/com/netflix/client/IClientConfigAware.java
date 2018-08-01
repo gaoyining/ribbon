@@ -24,6 +24,9 @@ import com.netflix.client.config.IClientConfig;
  * Its easier to do this by using {@link IClientConfig} as the object that carries these configurations
  * and to define a common interface that components that need this can implement and hence be aware of.
  *
+ * 有多个类（和组件）需要访问配置。 通过使用{@link IClientConfig}作为携带这些配置的对象并定义一个公共接口，
+ * 可以更容易地实现这一点，需要它的组件可以实现并因此意识到。
+ *
  * @author stonse
  * @author awang 
  *

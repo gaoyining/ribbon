@@ -191,7 +191,12 @@ public class ClientFactory {
      * Creates instance related to client framework using reflection. It first checks if the object is an instance of 
      * {@link IClientConfigAware} and if so invoke {@link IClientConfigAware#initWithNiwsConfig(IClientConfig)}. If that does not
      * apply, it tries to find if there is a constructor with {@link IClientConfig} as a parameter and if so invoke that constructor. If neither applies,
-     * it simply invokes the no-arg constructor and ignores the clientConfig parameter. 
+     * it simply invokes the no-arg constructor and ignores the clientConfig parameter.
+     *
+     * 使用反射创建与客户端框架相关的实例。 它首先检查对象是否是{@link IClientConfigAware}的实例，
+     * 如果是，则调用{@link IClientConfigAware #initWithNiwsConfig（IClientConfig）}。
+     * 如果这不适用，它会尝试查找是否有一个带有{@link IClientConfig}的构造函数作为参数，
+     * 如果是，则调用该构造函数。 如果两者都不适用，它只是调用no-arg构造函数并忽略clientConfig参数。
      *  
      * @param className Class name of the object
      * @param clientConfig IClientConfig object used for initialization.
@@ -201,7 +206,11 @@ public class ClientFactory {
     		throws InstantiationException, IllegalAccessException, ClassNotFoundException {
     	Class clazz = Class.forName(className);
     	if (IClientConfigAware.class.isAssignableFrom(clazz)) {
+    	    // 通过 api.ribbon.NIWSServerListClassName 进行配置
+    	    // com.netflix.niws.loadbalancer.DiscoveryEnabledNIWSServerList 是 IClientConfigAware类型
     		IClientConfigAware obj = (IClientConfigAware) clazz.newInstance();
+    		// ----------------------关键方法-------------------
+            // 初始化DiscoveryEnabledNIWSServerList
     		obj.initWithNiwsConfig(clientConfig);
     		return obj;
     	} else {
@@ -211,6 +220,7 @@ public class ClientFactory {
     		    }
     		} catch (NoSuchMethodException ignored) {
     		    // OK for a class to not take an IClientConfig
+                // 确定类不接受IClientConfig
     		} catch (SecurityException | IllegalArgumentException | InvocationTargetException e) { 
     		    logger.warn("Error getting/invoking IClientConfig constructor of {}", className, e);
     		}    		

@@ -36,8 +36,17 @@ import java.util.List;
 public abstract class AbstractLoadBalancer implements ILoadBalancer {
     
     public enum ServerGroup{
+        /**
+         * 所有
+         */
         ALL,
+        /**
+         *可用
+         */
         STATUS_UP,
+        /**
+         * 不可用
+         */
         STATUS_NOT_UP        
     }
         

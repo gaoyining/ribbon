@@ -49,6 +49,12 @@ import com.netflix.servo.monitor.Monitors;
  * passed into this class during initialization. When turned on, servers outside the same zone (as 
  * indicated by {@link Server#getZone()}) will be filtered out. By default, zone affinity 
  * and exclusivity are turned off and nothing is filtered out.
+ *
+ * 此服务器列表过滤器处理根据区域关联过滤掉服务器。
+ * 如果在初始化期间传入此类的{@link IClientConfig}对象中将{@link CommonClientConfigKey＃EnableZoneAffinity}
+ * 或{@link CommonClientConfigKey＃EnableZoneExclusivity}设置为true，
+ * 则会打开此过滤。 打开时，同一区域外的服务器（如{@link Server＃getZone（）}所示）将被过滤掉。
+ * 默认情况下，区域关联性和排他性被关闭，没有任何过滤掉。
  * 
  * @author stonse
  *

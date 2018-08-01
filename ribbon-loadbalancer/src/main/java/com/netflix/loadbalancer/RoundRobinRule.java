@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The most well known and basic load balancing strategy, i.e. Round Robin Rule.
  *
+ * 最着名和最基本的负载平衡策略，即循环规则。
+ *
  * @author stonse
  * @author Nikos Michalakis <nikos@netflix.com>
  *
@@ -93,6 +95,8 @@ public class RoundRobinRule extends AbstractLoadBalancerRule {
 
     /**
      * Inspired by the implementation of {@link AtomicInteger#incrementAndGet()}.
+     *
+     * 灵感来自{@link AtomicInteger＃incrementAndGet（）}的实现。
      *
      * @param modulo The modulo to bound the value of the counter.
      * @return The next value.

@@ -25,6 +25,9 @@ import com.netflix.loadbalancer.Server;
 /**
  * Servers that were obtained via Discovery and hence contain
  * meta data in the form of InstanceInfo
+ *
+ * 通过Discovery获取的服务器因此包含InstanceInfo形式的元数据
+ *
  * @author stonse
  *
  */

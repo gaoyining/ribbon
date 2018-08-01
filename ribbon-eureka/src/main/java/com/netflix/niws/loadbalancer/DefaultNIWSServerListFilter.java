@@ -22,6 +22,9 @@ import com.netflix.loadbalancer.ZoneAffinityServerListFilter;
 
 /**
  * The Default NIWS Filter - deals with filtering out servers based on the Zone affinity and other related properties
+ *
+ * 默认NIWS过滤器 - 根据区域关联性和其他相关属性处理过滤服务器
+ *
  * @author stonse
  *
  */

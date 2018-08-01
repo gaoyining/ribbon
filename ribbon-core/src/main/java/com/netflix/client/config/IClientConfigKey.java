@@ -20,6 +20,8 @@ package com.netflix.client.config;
 /**
  * Defines the key used in {@link IClientConfig}. See {@link CommonClientConfigKey}
  * for the commonly defined client configuration keys.
+ *
+ * 定义{@link IClientConfig}中使用的密钥。 有关常用的客户端配置密钥，请参阅{@link CommonClientConfigKey}。
  * 
  * @author awang
  *
